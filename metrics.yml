@@ -1,0 +1,50 @@
+---
+- name: Monitor Memory and Disk Usage
+  hosts: all
+  become: yes
+  vars:
+    memory_threshold: 90  # Alert if memory usage exceeds 90%
+    disk_threshold: 90    # Alert if disk usage exceeds 90%
+    webhook_url: "https://discord.com/api/webhooks/1341011025926819861/iwbomQaEk5e6Y8MBRx47ln0hFPd-TPFBj3TjIwZBJfSSpfbSqAU0nM46Z023GgJamgQy"
+
+  tasks:
+    - name: Check Memory Usage
+      shell: free | awk '/Mem/{printf("%.0f", $3/$2*100)}'
+      register: memory_usage
+
+    - name: Check Disk Usage
+      shell: df -h / | awk 'NR==2 {print $5}' | tr -d '%'
+      register: disk_usage
+
+    - name: Debug - Check Values Before Sending
+      debug:
+        msg: "Memory: {{ memory_usage.stdout }}, Disk: {{ disk_usage.stdout }}"
+
+    - name: Send Discord Alert for High Memory Usage
+      uri:
+        url: "{{ webhook_url }}"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: >
+          {
+            "content": ":warning: *Memory Alert!* Server: `{{ inventory_hostname }}` - Memory usage is at **{{ memory_usage.stdout }}%**"
+          }
+        body_format: json
+        status_code: [200]
+      when: memory_usage.stdout|int > memory_threshold and memory_usage.stdout is not none and memory_usage.stdout != ""
+
+    - name: Send Discord Alert for High Disk Usage
+      uri:
+        url: "{{ webhook_url }}"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: >
+          {
+            "content": ":warning: *Disk Alert!* Server: `{{ inventory_hostname }}` - Disk usage is at **{{ disk_usage.stdout }}%**"
+          }
+        body_format: json
+        status_code: [200]
+      when: disk_usage.stdout|int > disk_threshold and disk_usage.stdout is not none and disk_usage.stdout != ""
+ 
