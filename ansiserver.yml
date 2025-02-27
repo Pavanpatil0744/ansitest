@@ -1,10 +1,8 @@
 ---
 - name: check dir exist or not
   hosts: localhost
-  become: true
   gather_facts: yes
   tasks:
-
     - name: Get current date and time
       set_fact:
         current_date: "{{ ansible_date_time.iso8601 | regex_replace('T.*', '') }}"
@@ -21,3 +19,4 @@
     - name: Get current user
       command: whoami
       register: whoami_output
+
