@@ -1,5 +1,6 @@
 - name: check dir exist or not
   hosts: localhost
+  become: true
   gather_facts: yes
   tasks:
 
