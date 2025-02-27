@@ -15,3 +15,7 @@
       file:
         path: /home/ansiuser/Backup/test_dir
         state: directory
+        
+    - name: Get current user
+      command: whoami
+      register: whoami_output
