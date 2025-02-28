@@ -1,6 +1,6 @@
 ---
 - name: Check and print current user
-  hosts: localhost
+  hosts: vg_ansible
   gather_facts: no
   tasks:
     - name: Get current user
